@@ -2,12 +2,12 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { BRAND, NAV_LINKS } from "@/lib/nav";
+import { COMPANY } from "@/lib/company";
 
 /**
  * Отдельной страницы "Контакты" в архитектуре сайта нет — её функцию
- * частично закрывает футер. Реальные контактные данные (телефон, Telegram,
- * email) появятся позже через раздел "Настройки" в админке; пока это
- * заглушки на будущее хранение site_settings, без обмана пользователя.
+ * частично закрывает футер: телефон, Telegram и юридические реквизиты ИП.
+ * Значения берутся из @/lib/company (единый источник правды).
  */
 export function Footer() {
   return (
@@ -62,15 +62,32 @@ export function Footer() {
             <p className="text-xs font-medium uppercase tracking-[0.1em] text-[var(--color-text-inverse)]/50">
               Контакты
             </p>
-            <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-inverse)]/60">
-              Контактные данные появятся здесь позже. Самый быстрый способ
-              обратиться — заявка на сайте.
-            </p>
+            <div className="mt-4 flex flex-col gap-3 text-sm">
+              <a
+                href={`tel:${COMPANY.phone.href}`}
+                className="text-[var(--color-text-inverse)]/80 hover:text-[var(--color-text-inverse)]"
+              >
+                {COMPANY.phone.display}
+              </a>
+              <a
+                href={COMPANY.telegram.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-text-inverse)]/80 hover:text-[var(--color-text-inverse)]"
+              >
+                Telegram: {COMPANY.telegram.handle}
+              </a>
+            </div>
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/10 pt-6 text-xs text-[var(--color-text-inverse)]/50">
-          © {new Date().getFullYear()} {BRAND.en} / {BRAND.ru}. Все права защищены.
+        <div className="mt-12 flex flex-col gap-1 border-t border-white/10 pt-6 text-xs text-[var(--color-text-inverse)]/50">
+          <p>
+            {COMPANY.legalName}, ИНН {COMPANY.inn}
+          </p>
+          <p>
+            © {new Date().getFullYear()} {BRAND.en} / {BRAND.ru}. Все права защищены.
+          </p>
         </div>
       </Container>
     </footer>
