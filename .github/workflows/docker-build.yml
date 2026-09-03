@@ -36,9 +36,9 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository | lowercase }}:latest
+            ghcr.io/${{ github.repository | lowercase }}:${{ github.sha }}
+            ghcr.io/${{ github.repository | lowercase }}:${{ github.ref_name }}
           # NEXT_PUBLIC_* переменные подставляются на этапе сборки.
           # Задайте значение в Settings -> Secrets and variables -> Actions
           # (Repository variable NEXT_PUBLIC_SITE_URL), если нужно.
