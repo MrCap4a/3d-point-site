@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "telegram:chat-id": "node --env-file=.env scripts/telegram-chat-id.mjs",
+    "telegram:test": "node --env-file=.env scripts/telegram-chat-id.mjs --send"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

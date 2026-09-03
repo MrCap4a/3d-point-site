@@ -13,15 +13,24 @@ RUN npm ci
 ########################
 FROM node:22-slim AS builder
 WORKDIR /app
+
+# Prisma требует libssl; node:22-slim (bookworm) идёт без пакета openssl,
+# из-за чего движок запросов не может определить версию libssl.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Схема Prisma читает url из env("DATABASE_URL") без дефолта.
-# SQLite-файл создаётся в /app/prisma/dev.db (путь относительный
-# к prisma/schema.prisma). В рантайме переопределяется из окружения.
-ENV DATABASE_URL="file:/app/prisma/dev.db"
+# SQLite-файл держим в отдельном каталоге /app/data (НЕ в prisma/), чтобы
+# в рантайме можно было примонтировать volume только на данные, не
+# перекрывая schema.prisma и migrations/. В рантайме путь переопределяется.
+ENV DATABASE_URL="file:/app/data/dev.db"
+RUN mkdir -p /app/data
 
 # NEXT_PUBLIC_* переменные попадают в JS-бандлы на этапе сборки,
 # поэтому прокидываются как build-arg (см. GitHub Action).
@@ -45,7 +54,12 @@ WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
-    DATABASE_URL="file:/app/prisma/dev.db"
+    DATABASE_URL="file:/app/data/dev.db"
+
+# Prisma требует libssl (см. комментарий в стадии builder).
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
@@ -56,13 +70,14 @@ RUN npm prune --omit=dev
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/data ./data
 
 # Каталог для загруженных файлов (заявки, изображения портфолио).
 # ВАЖНО: для продакшена смонтируйте сюда volume, чтобы файлы
 # переживали пересоздание контейнера (см. README).
-# Запись нужна только в uploads/, prisma/ (SQLite dev.db) и .next/
+# Запись нужна только в uploads/, data/ (SQLite dev.db) и .next/
 # (кэш next/image), поэтому chown не на весь /app — это сильно быстрее.
-RUN mkdir -p uploads && chown -R node:node uploads prisma .next
+RUN mkdir -p uploads data && chown -R node:node uploads data .next
 
 USER node
 EXPOSE 3000

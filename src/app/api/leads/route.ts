@@ -8,6 +8,7 @@ import {
 } from "@/lib/validation/lead";
 import { saveUploadedFile } from "@/lib/uploads";
 import { isRateLimited } from "@/lib/rate-limit";
+import { notifyNewLead } from "@/lib/telegram";
 
 /**
  * POST /api/leads — приём заявки с любой из форм сайта (диспетчер на
@@ -110,9 +111,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // TODO: следующий этап — пересылка заявки в Telegram (не блокирует
-    // сохранение в БД, см. архитектуру: заявка должна сохраняться независимо
-    // от доступности Telegram).
+    // Оповещение администратора в Telegram. Намеренно после сохранения в БД и
+    // без проброса ошибок: заявка уже записана, а доступность Telegram на
+    // результат для пользователя влиять не должна (см. архитектуру).
+    await notifyNewLead(lead, files.length);
 
     return NextResponse.json({ ok: true });
   } catch (error) {
