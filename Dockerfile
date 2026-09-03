@@ -26,7 +26,7 @@ ENV DATABASE_URL="file:/app/prisma/dev.db"
 # NEXT_PUBLIC_* переменные попадают в JS-бандлы на этапе сборки,
 # поэтому прокидываются как build-arg (см. GitHub Action).
 # Дефолт — как в коде приложения (src/app/layout.tsx и др.).
-ARG NEXT_PUBLIC_SITE_URL=https://3-dpoint.ru
+ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 # Страницы портфолио пререндерятся во время сборки (ISR, revalidate=60)
