@@ -30,18 +30,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Convert repository name to lowercase
+        id: vars
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "repo_lower=$REPO_LOWER" >> $GITHUB_OUTPUT
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository | lowercase }}:latest
-            ghcr.io/${{ github.repository | lowercase }}:${{ github.sha }}
-            ghcr.io/${{ github.repository | lowercase }}:${{ github.ref_name }}
-          # NEXT_PUBLIC_* переменные подставляются на этапе сборки.
-          # Задайте значение в Settings -> Secrets and variables -> Actions
-          # (Repository variable NEXT_PUBLIC_SITE_URL), если нужно.
+            ghcr.io/${{ steps.vars.outputs.repo_lower }}:latest
+            ghcr.io/${{ steps.vars.outputs.repo_lower }}:${{ github.sha }}
+            ghcr.io/${{ steps.vars.outputs.repo_lower }}:${{ github.ref_name }}
           build-args: |
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
           cache-from: type=gha
