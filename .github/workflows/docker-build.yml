@@ -46,6 +46,6 @@ jobs:
             ghcr.io/${{ steps.vars.outputs.repo_lower }}:${{ github.sha }}
             ghcr.io/${{ steps.vars.outputs.repo_lower }}:${{ github.ref_name }}
           build-args: |
-            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://3-dpoint.ru' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
