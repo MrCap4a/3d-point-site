@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/Button";
+import { MetrikaNotFoundInit } from "@/components/analytics/MetrikaNotFoundInit";
+
+export const metadata: Metadata = {
+  title: "Страница не найдена",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function NotFound() {
   return (
@@ -19,6 +29,7 @@ export default function NotFound() {
           Рассказать о задаче
         </Button>
       </div>
+      <MetrikaNotFoundInit />
     </div>
   );
 }

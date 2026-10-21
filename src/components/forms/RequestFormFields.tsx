@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Field, inputClasses } from "@/components/forms/Field";
 import type { ClientType } from "@/components/forms/types";
+import { reachGoal } from "@/lib/metrika";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
@@ -42,6 +43,7 @@ export function RequestFormFields({ clientType }: { clientType: ClientType }) {
       }
 
       setState("success");
+      reachGoal("form_submit");
     } catch {
       setState("error");
       setErrorMessage("Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.");

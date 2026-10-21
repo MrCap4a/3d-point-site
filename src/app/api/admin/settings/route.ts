@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/require-admin";
@@ -39,6 +40,10 @@ export async function PUT(request: NextRequest) {
       })
     )
   );
+
+  // Контакты выводятся в футере и мобильной панели на всех публичных
+  // страницах, в т.ч. статических — сбрасываем кэш всего публичного layout.
+  revalidatePath("/", "layout");
 
   return NextResponse.json({ ok: true });
 }

@@ -2,14 +2,16 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { BRAND, NAV_LINKS } from "@/lib/nav";
+import type { SiteContacts } from "@/lib/contacts";
 
 /**
  * Отдельной страницы "Контакты" в архитектуре сайта нет — её функцию
- * частично закрывает футер. Реальные контактные данные (телефон, Telegram,
- * email) появятся позже через раздел "Настройки" в админке; пока это
- * заглушки на будущее хранение site_settings, без обмана пользователя.
+ * частично закрывает футер. Телефон и Telegram задаются в разделе
+ * "Настройки" админки; незаполненное поле не выводится.
  */
-export function Footer() {
+export function Footer({ contacts }: { contacts: SiteContacts }) {
+  const hasContacts = Boolean(contacts.phone || contacts.telegram);
+
   return (
     <footer className="bg-[var(--color-bg-deep)] text-[var(--color-text-inverse)]">
       <Container className="py-16">
@@ -62,10 +64,36 @@ export function Footer() {
             <p className="text-xs font-medium uppercase tracking-[0.1em] text-[var(--color-text-inverse)]/50">
               Контакты
             </p>
-            <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-inverse)]/60">
-              Контактные данные появятся здесь позже. Самый быстрый способ
-              обратиться — заявка на сайте.
-            </p>
+            {hasContacts ? (
+              <ul className="mt-4 flex flex-col gap-3 text-sm">
+                {contacts.phone && (
+                  <li>
+                    <a
+                      href={contacts.phone.href}
+                      className="text-[var(--color-text-inverse)]/80 hover:text-[var(--color-text-inverse)]"
+                    >
+                      {contacts.phone.label}
+                    </a>
+                  </li>
+                )}
+                {contacts.telegram && (
+                  <li>
+                    <a
+                      href={contacts.telegram.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--color-text-inverse)]/80 hover:text-[var(--color-text-inverse)]"
+                    >
+                      Telegram {contacts.telegram.label}
+                    </a>
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-inverse)]/60">
+                Самый быстрый способ обратиться — заявка на сайте.
+              </p>
+            )}
           </div>
         </div>
 
