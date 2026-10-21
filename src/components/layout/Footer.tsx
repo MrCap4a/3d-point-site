@@ -2,12 +2,15 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { BRAND, NAV_LINKS } from "@/lib/nav";
+import { COMPANY } from "@/lib/company";
 import type { SiteContacts } from "@/lib/contacts";
 
 /**
  * Отдельной страницы "Контакты" в архитектуре сайта нет — её функцию
- * частично закрывает футер. Телефон и Telegram задаются в разделе
- * "Настройки" админки; незаполненное поле не выводится.
+ * частично закрывает футер: телефон, Telegram и юридические реквизиты ИП.
+ * Телефон и Telegram задаются в разделе "Настройки" админки, при пустом
+ * поле — значение из @/lib/company (см. getSiteContacts). Реквизиты ИП —
+ * всегда из @/lib/company.
  */
 export function Footer({ contacts }: { contacts: SiteContacts }) {
   const hasContacts = Boolean(contacts.phone || contacts.telegram);
@@ -84,7 +87,7 @@ export function Footer({ contacts }: { contacts: SiteContacts }) {
                       rel="noopener noreferrer"
                       className="text-[var(--color-text-inverse)]/80 hover:text-[var(--color-text-inverse)]"
                     >
-                      Telegram {contacts.telegram.label}
+                      Telegram: {contacts.telegram.label}
                     </a>
                   </li>
                 )}
@@ -97,8 +100,13 @@ export function Footer({ contacts }: { contacts: SiteContacts }) {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/10 pt-6 text-xs text-[var(--color-text-inverse)]/50">
-          © {new Date().getFullYear()} {BRAND.en} / {BRAND.ru}. Все права защищены.
+        <div className="mt-12 flex flex-col gap-1 border-t border-white/10 pt-6 text-xs text-[var(--color-text-inverse)]/50">
+          <p>
+            {COMPANY.legalName}, ИНН {COMPANY.inn}
+          </p>
+          <p>
+            © {new Date().getFullYear()} {BRAND.en} / {BRAND.ru}. Все права защищены.
+          </p>
         </div>
       </Container>
     </footer>

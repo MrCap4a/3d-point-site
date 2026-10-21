@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { COMPANY } from "@/lib/company";
 
 export type ContactLink = { label: string; href: string };
 
@@ -35,14 +36,19 @@ export function telegramUsername(raw: string): string | null {
 }
 
 /**
- * Контакты для публичной части сайта из настроек админки. Пустое поле —
- * null, и соответствующий блок на сайте не выводится.
+ * Контакты для публичной части сайта. Приоритет — настройки админки; если
+ * поле там пустое, берётся подтверждённое значение из @/lib/company. Если
+ * пусто и там — null, и соответствующий блок на сайте не выводится.
  */
 export async function getSiteContacts(): Promise<SiteContacts> {
   const rows = await prisma.siteSetting.findMany({
     where: { key: { in: ["phone", "telegram"] } },
   });
-  const values = Object.fromEntries(rows.map((r) => [r.key, r.value.trim()]));
+  const settings = Object.fromEntries(rows.map((r) => [r.key, r.value.trim()]));
+  const values = {
+    phone: settings.phone || COMPANY.phone.display,
+    telegram: settings.telegram || COMPANY.telegram.handle,
+  };
 
   const phone = values.phone ? phoneHref(values.phone) : null;
   const telegram = values.telegram ? telegramUsername(values.telegram) : null;
