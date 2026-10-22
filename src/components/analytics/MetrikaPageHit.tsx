@@ -15,6 +15,7 @@ export function MetrikaPageHit() {
   const prevUrl = useRef<string | null>(null);
 
   useEffect(() => {
+    if (METRIKA_ID === null) return;
     const url = window.location.href;
 
     if (prevUrl.current !== null && prevUrl.current !== url) {

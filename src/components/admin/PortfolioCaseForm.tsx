@@ -3,17 +3,35 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { PORTFOLIO_CATEGORIES, PORTFOLIO_CATEGORY_LABELS } from "@/lib/portfolio";
+import type { PortfolioCategory } from "@/lib/portfolio";
 
 type ImageItem = { id: string; filePath: string };
 
+type FormValues = {
+  title: string;
+  description: string;
+  price: string;
+  material: string;
+  leadTime: string;
+  categories: PortfolioCategory[];
+  beforeImageId: string;
+};
+
 type Props = {
   caseId?: string;
-  initial?: {
-    title: string;
-    description: string;
-    price: string;
-  };
+  initial?: FormValues;
   initialImages?: ImageItem[];
+};
+
+const EMPTY_FORM: FormValues = {
+  title: "",
+  description: "",
+  price: "",
+  material: "",
+  leadTime: "",
+  categories: [],
+  beforeImageId: "",
 };
 
 const inputClasses =
@@ -21,13 +39,7 @@ const inputClasses =
 
 export function PortfolioCaseForm({ caseId, initial, initialImages = [] }: Props) {
   const router = useRouter();
-  const [form, setForm] = useState(
-    initial ?? {
-      title: "",
-      description: "",
-      price: "",
-    }
-  );
+  const [form, setForm] = useState<FormValues>(initial ?? EMPTY_FORM);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [images, setImages] = useState(initialImages);
   const [saving, setSaving] = useState(false);
@@ -53,6 +65,9 @@ export function PortfolioCaseForm({ caseId, initial, initialImages = [] }: Props
       formData.set("title", form.title);
       formData.set("description", form.description);
       formData.set("price", form.price);
+      formData.set("material", form.material);
+      formData.set("leadTime", form.leadTime);
+      form.categories.forEach((category) => formData.append("categories", category));
       newFiles.forEach((file) => formData.append("files", file));
 
       response = await fetch("/api/admin/portfolio", { method: "POST", body: formData });
@@ -100,6 +115,16 @@ export function PortfolioCaseForm({ caseId, initial, initialImages = [] }: Props
     if (!caseId) return;
     await fetch(`/api/admin/portfolio/${caseId}/images/${imageId}`, { method: "DELETE" });
     setImages((prev) => prev.filter((img) => img.id !== imageId));
+    if (form.beforeImageId === imageId) setForm((prev) => ({ ...prev, beforeImageId: "" }));
+  }
+
+  function toggleCategory(category: PortfolioCategory) {
+    setForm((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter((item) => item !== category)
+        : [...prev.categories, category],
+    }));
   }
 
   return (
@@ -167,11 +192,61 @@ export function PortfolioCaseForm({ caseId, initial, initialImages = [] }: Props
         />
       </div>
 
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+            Материал (необязательно)
+          </label>
+          <input
+            type="text"
+            placeholder="например, PETG"
+            value={form.material}
+            onChange={(e) => setForm({ ...form, material: e.target.value })}
+            className={inputClasses}
+          />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+            Срок (необязательно)
+          </label>
+          <input
+            type="text"
+            placeholder="например, 2 дня"
+            value={form.leadTime}
+            onChange={(e) => setForm({ ...form, leadTime: e.target.value })}
+            className={inputClasses}
+          />
+        </div>
+      </div>
+
+      <fieldset>
+        <legend className="mb-1.5 block text-sm font-medium text-[var(--color-text)]">Категории</legend>
+        <p className="mb-2 text-xs text-[var(--color-text-2)]">
+          Определяют, на каких страницах сайта показывается работа (например, «Частные» — на /private).
+        </p>
+        <div className="flex flex-wrap gap-x-5 gap-y-2">
+          {PORTFOLIO_CATEGORIES.map((category) => (
+            <label key={category} className="flex items-center gap-2 text-sm text-[var(--color-text)]">
+              <input
+                type="checkbox"
+                checked={form.categories.includes(category)}
+                onChange={() => toggleCategory(category)}
+                className="h-4 w-4 accent-[var(--color-accent)]"
+              />
+              {PORTFOLIO_CATEGORY_LABELS[category]}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
       {!isCreating && (
         <div>
           <label className="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
             Изображения
           </label>
+          <p className="mb-2 text-xs text-[var(--color-text-2)]">
+            Первое фото — обложка. Отметьте «Фото до», чтобы в карточке показывались «до» и «после».
+          </p>
           <div className="flex flex-wrap gap-3">
             {images.map((img) => (
               <div key={img.id} className="relative">
@@ -181,6 +256,15 @@ export function PortfolioCaseForm({ caseId, initial, initialImages = [] }: Props
                   alt=""
                   className="h-20 w-20 rounded-[var(--radius-sm)] object-cover"
                 />
+                <label className="mt-1 flex items-center gap-1 text-xs text-[var(--color-text-2)]">
+                  <input
+                    type="checkbox"
+                    checked={form.beforeImageId === img.id}
+                    onChange={(e) => setForm({ ...form, beforeImageId: e.target.checked ? img.id : "" })}
+                    className="h-3.5 w-3.5 accent-[var(--color-accent)]"
+                  />
+                  Фото до
+                </label>
                 <button
                   type="button"
                   onClick={() => handleDeleteImage(img.id)}

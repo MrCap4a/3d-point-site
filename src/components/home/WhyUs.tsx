@@ -3,43 +3,35 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 
 const REASONS = [
   {
-    title: "Берём задачу под ключ",
-    description:
-      "Сами разбираемся в проблеме, подбираем материал и способ изготовления — вам не нужно погружаться в технические детали.",
+    title: "Не нужна 3D-модель",
+    description: "Хватит фото, образца или размеров — геометрию воссоздадим сами.",
   },
   {
     title: "Работаем до результата",
-    description:
-      "Не считаем задачу закрытой после печати — важно, чтобы деталь решила вашу проблему.",
+    description: "Задача закрыта, когда деталь решила проблему, а не когда её напечатали.",
   },
   {
-    title: "Не требуем готовую 3D-модель",
-    description:
-      "Достаточно фото, образца, чертежа или размеров. При необходимости воссоздадим геометрию сами.",
+    title: "Выезд к клиенту",
+    description: "Для бизнеса приезжаем на объект, чтобы посмотреть и снять размеры.",
   },
   {
-    title: "Доставка и выезд",
-    description:
-      "Готовое изделие можно получить доставкой. При необходимости выезжаем к клиенту, для бизнеса — на объект.",
+    title: "Доставка",
+    description: "Приезжать к нам необязательно — готовую деталь отправим.",
   },
 ];
 
+/** «Почему мы»: объединённый блок, четыре пункта. */
 export function WhyUs() {
   return (
-    <section className="border-b border-[var(--color-border)] bg-[var(--color-bg)] py-20 sm:py-28">
+    <section className="border-b border-[var(--color-border)] bg-[var(--color-bg-2)] py-12 sm:py-20">
       <Container>
-        <SectionHeading
-          label="Почему обращаются к нам"
-          title="Ответственный подход к каждой задаче"
-        />
+        <SectionHeading label="Почему мы" title="Берём задачу под ключ" />
 
-        <div className="mt-14 grid gap-x-10 gap-y-10 sm:grid-cols-2">
+        <div className="mt-6 grid gap-x-10 gap-y-5 sm:mt-10 sm:grid-cols-2 sm:gap-y-8 lg:grid-cols-4">
           {REASONS.map((reason) => (
-            <div key={reason.title}>
-              <h3 className="text-base font-semibold text-[var(--color-text)]">
-                {reason.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-2)] sm:text-base">
+            <div key={reason.title} className="border-t border-[var(--color-border)] pt-4 sm:pt-5">
+              <h3 className="text-base font-semibold text-[var(--color-text)]">{reason.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-[var(--color-text-2)] sm:text-base">
                 {reason.description}
               </p>
             </div>

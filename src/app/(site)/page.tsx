@@ -1,27 +1,33 @@
 import { Hero } from "@/components/home/Hero";
-import { ProblemSolution } from "@/components/home/ProblemSolution";
-import { Directions } from "@/components/home/Directions";
 import { HowWeWork } from "@/components/home/HowWeWork";
 import { WhyUs } from "@/components/home/WhyUs";
-import { PortfolioPreview } from "@/components/home/PortfolioPreview";
-import { DeliveryOptions } from "@/components/home/DeliveryOptions";
-import { RequestFormSection } from "@/components/home/RequestFormSection";
+import { Services } from "@/components/home/Services";
+import { Prices } from "@/components/home/Prices";
+import { Reviews } from "@/components/home/Reviews";
+import { Workshop } from "@/components/home/Workshop";
+import { PortfolioSection } from "@/components/portfolio/PortfolioSection";
+import { RequestFormSection } from "@/components/forms/RequestFormSection";
+import { getPublishedCases } from "@/lib/portfolio-queries";
 
-// PortfolioPreview читает опубликованные кейсы из БД — без ревалидации
-// новые кейсы, добавленные через админку, не появлялись бы на главной без
-// пересборки сайта.
+// Работы портфолио читаются из БД — без ревалидации новые кейсы из админки
+// не появлялись бы на главной без пересборки сайта.
 export const revalidate = 60;
 
-export default function Home() {
+// title, description, canonical, Open Graph — из app/(site)/layout.tsx.
+
+export default async function Home() {
+  const cases = await getPublishedCases({ take: 6 });
+
   return (
     <>
-      <Hero />
-      <ProblemSolution />
-      <Directions />
+      <Hero collage={cases.slice(0, 3)} />
+      <PortfolioSection items={cases} label="Работы" title="Примеры работ" />
       <HowWeWork />
       <WhyUs />
-      <PortfolioPreview />
-      <DeliveryOptions />
+      <Services />
+      <Prices />
+      <Reviews />
+      <Workshop />
       <RequestFormSection />
     </>
   );

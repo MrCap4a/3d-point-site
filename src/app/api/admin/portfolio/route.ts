@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { portfolioCaseSchema } from "@/lib/validation/portfolio";
 import { savePortfolioImage } from "@/lib/portfolio-uploads";
+import { serializeCategories } from "@/lib/portfolio";
 
 /** GET /api/admin/portfolio — все кейсы, включая скрытые, по порядку. */
 export async function GET() {
@@ -32,6 +33,9 @@ export async function POST(request: NextRequest) {
     title: formData.get("title"),
     description: formData.get("description"),
     price: formData.get("price") ?? "",
+    material: formData.get("material") ?? "",
+    leadTime: formData.get("leadTime") ?? "",
+    categories: formData.getAll("categories").map(String),
   });
 
   if (!parsed.success) {
@@ -62,6 +66,9 @@ export async function POST(request: NextRequest) {
         title: parsed.data.title,
         description: parsed.data.description,
         price: parsed.data.price || null,
+        material: parsed.data.material || null,
+        leadTime: parsed.data.leadTime || null,
+        categories: serializeCategories(parsed.data.categories),
         sortOrder: (maxOrder._max.sortOrder ?? 0) + 1,
         images: {
           create: saved.map((s, index) => ({ filePath: s.filePath, sortOrder: index })),

@@ -16,6 +16,7 @@ export function MetrikaNotFoundInit() {
   const done = useRef(false);
 
   useEffect(() => {
+    if (METRIKA_ID === null || METRIKA_TAG_URL === null) return;
     if (done.current) return;
     done.current = true;
 

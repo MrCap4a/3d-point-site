@@ -34,6 +34,10 @@ export default async function AdminLeadDetailsPage(
         <Field label="Описание задачи" value={lead.description} />
         {lead.batchSize && <Field label="Примерный объём партии" value={lead.batchSize} />}
         {lead.sourcePage && <Field label="Страница обращения" value={lead.sourcePage} />}
+        <Field
+          label="Согласие на обработку ПДн"
+          value={lead.consentAt ? `Дано ${lead.consentAt.toLocaleString("ru-RU")}` : "Не зафиксировано (заявка до появления чекбокса)"}
+        />
 
         <div>
           <p className="mb-1.5 text-xs font-medium uppercase tracking-[0.08em] text-[var(--color-text-3)]">

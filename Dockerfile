@@ -37,6 +37,12 @@ RUN mkdir -p /app/data
 # Дефолт — как в коде приложения (src/app/(site)/layout.tsx и др.).
 ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+# Номер счётчика Яндекс Метрики; пусто — счётчик на сайт не ставится.
+ARG NEXT_PUBLIC_YM_ID
+ENV NEXT_PUBLIC_YM_ID=$NEXT_PUBLIC_YM_ID
+# Код подтверждения Яндекс Вебмастера; пусто — метатег не выводится.
+ARG NEXT_PUBLIC_YANDEX_VERIFICATION
+ENV NEXT_PUBLIC_YANDEX_VERIFICATION=$NEXT_PUBLIC_YANDEX_VERIFICATION
 
 # Страницы портфолио пререндерятся во время сборки (ISR, revalidate=60)
 # и читают базу данных, поэтому до `next build` применяем миграции

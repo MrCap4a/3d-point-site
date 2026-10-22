@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   leadFormSchema,
-  ALLOWED_FILE_MIME_TYPES,
+  isAllowedLeadFile,
   MAX_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_MB,
   MAX_FILES_PER_LEAD,
 } from "@/lib/validation/lead";
 import { saveUploadedFile } from "@/lib/uploads";
@@ -11,8 +12,10 @@ import { isRateLimited } from "@/lib/rate-limit";
 import { notifyNewLead } from "@/lib/telegram";
 
 /**
- * POST /api/leads — приём заявки с любой из форм сайта (диспетчер на
- * главной или контекстные формы на /private, /business, /serial).
+ * POST /api/leads — приём заявки с единой формы, которая стоит на главной,
+ * /private, /business, страницах услуг и /portfolio. Без отметки согласия
+ * на обработку персональных данных заявка не принимается; момент согласия
+ * сохраняется в consentAt.
  * Заявка сохраняется в БД независимо от дальнейшей Telegram-интеграции
  * (она подключается отдельным этапом и не блокирует сохранение).
  * Пользователю никогда не показываются технические детали ошибок сервера.
@@ -39,7 +42,8 @@ export async function POST(request: NextRequest) {
       contactValue: formData.get("contact"),
       description: formData.get("description"),
       company: formData.get("company") ?? "",
-      batchSize: formData.get("batchSize") ?? "",
+      source: formData.get("source") ?? "",
+      consent: formData.get("consent"),
       website: formData.get("website") ?? "",
     });
 
@@ -71,11 +75,11 @@ export async function POST(request: NextRequest) {
     for (const file of files) {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         return NextResponse.json(
-          { ok: false, message: "Один из файлов слишком большой (максимум 15 МБ)." },
+          { ok: false, message: `Один из файлов слишком большой (максимум ${MAX_FILE_SIZE_MB} МБ).` },
           { status: 400 }
         );
       }
-      if (file.type && !ALLOWED_FILE_MIME_TYPES.has(file.type)) {
+      if (!isAllowedLeadFile(file)) {
         return NextResponse.json(
           { ok: false, message: "Один из файлов имеет неподдерживаемый формат." },
           { status: 400 }
@@ -84,6 +88,13 @@ export async function POST(request: NextRequest) {
     }
 
     const contactMethod = guessContactMethod(parsed.data.contactValue);
+    // Страница услуги, с которой пришла заявка, дописывается в описание —
+    // так она видна и в админке, и в уведомлении в Telegram.
+    const description = parsed.data.source
+      ? `${parsed.data.description}
+
+Страница: ${parsed.data.source}`
+      : parsed.data.description;
 
     const lead = await prisma.lead.create({
       data: {
@@ -92,9 +103,9 @@ export async function POST(request: NextRequest) {
         contactMethod,
         contactValue: parsed.data.contactValue,
         company: parsed.data.company || null,
-        description: parsed.data.description,
-        batchSize: parsed.data.batchSize || null,
+        description,
         sourcePage: request.headers.get("referer") ?? undefined,
+        consentAt: new Date(),
       },
     });
 

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PortfolioCaseForm } from "@/components/admin/PortfolioCaseForm";
+import { parseCategories } from "@/lib/portfolio";
 
 export default async function EditPortfolioCasePage(
   props: PageProps<"/admin/portfolio/[id]">
@@ -25,6 +26,10 @@ export default async function EditPortfolioCasePage(
             title: item.title,
             description: item.description,
             price: item.price ?? "",
+            material: item.material ?? "",
+            leadTime: item.leadTime ?? "",
+            categories: parseCategories(item.categories),
+            beforeImageId: item.beforeImageId ?? "",
           }}
           initialImages={item.images.map((img) => ({ id: img.id, filePath: img.filePath }))}
         />

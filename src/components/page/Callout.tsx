@@ -13,7 +13,7 @@ type CalloutProps = {
  */
 export function Callout({ children }: CalloutProps) {
   return (
-    <section className="bg-[var(--color-bg-deep)] py-16 sm:py-20">
+    <section className="bg-[var(--color-bg-deep)] py-11 sm:py-20">
       <Container>
         <p className="mx-auto max-w-3xl text-center text-xl font-medium leading-relaxed tracking-[-0.01em] text-[var(--color-text-inverse)] sm:text-2xl">
           {children}

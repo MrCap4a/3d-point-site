@@ -20,6 +20,11 @@ export async function DELETE(
   }
 
   await prisma.portfolioImage.delete({ where: { id: imageId } });
+  // Если удалили фото «до» — снимаем отметку с кейса.
+  await prisma.portfolioCase.updateMany({
+    where: { beforeImageId: imageId },
+    data: { beforeImageId: null },
+  });
   await unlink(resolvePortfolioImagePath(image.filePath)).catch(() => {
     // Файл мог быть уже удалён вручную — не блокируем удаление записи из БД.
   });

@@ -28,7 +28,7 @@ export function SectionHeading({
       <p className={`mb-3 text-xs font-medium uppercase tracking-[0.12em] ${labelColor}`}>
         {label}
       </p>
-      <h2 className={`text-3xl font-semibold tracking-[-0.02em] sm:text-4xl ${titleColor}`}>
+      <h2 className={`text-[1.625rem] font-semibold leading-tight tracking-[-0.02em] sm:text-4xl ${titleColor}`}>
         {title}
       </h2>
       {description && (

@@ -2,48 +2,50 @@
 
 import Image from "next/image";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
-import type { PortfolioCaseData } from "@/lib/portfolio";
+import { imageUrl, materialLeadTimeLine, type PortfolioCaseData } from "@/lib/portfolio";
 
 type PortfolioCardProps = {
   item: PortfolioCaseData;
-  onOpen: (item: PortfolioCaseData) => void;
+  onOpen: (item: PortfolioCaseData, trigger: HTMLButtonElement) => void;
+  priority?: boolean;
 };
 
 /**
- * Карточка кейса в сетке портфолио. По клику открывает модалку с полным
- * описанием (проблема/решение/результат) — сама сетка и модалка вынесены в
- * отдельный клиентский компонент PortfolioGrid, чтобы страница оставалась
- * серверным компонентом. Показывает реальное фото первого изображения
- * кейса, если оно загружено через админку, иначе — честную заглушку.
+ * Карточка кейса: фото, заголовок, цена и строка «материал · срок» (если
+ * заданы). По клику открывает модалку с полным описанием.
  */
-export function PortfolioCard({ item, onOpen }: PortfolioCardProps) {
-  const coverImage = item.images[0];
+export function PortfolioCard({ item, onOpen, priority = false }: PortfolioCardProps) {
+  const cover = item.images[0];
+  const details = materialLeadTimeLine(item);
 
   return (
     <button
       type="button"
-      onClick={() => onOpen(item)}
-      className="group text-left"
+      onClick={(event) => onOpen(item, event.currentTarget)}
+      className="group block w-full rounded-[var(--radius-md)] text-left"
       aria-haspopup="dialog"
     >
-      {coverImage ? (
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--radius-md)]">
+      {cover ? (
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-bg-2)]">
           <Image
-            src={`/api/portfolio/images/${coverImage.id}`}
+            src={imageUrl(cover.id)}
             alt={item.title}
             fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover transition-opacity group-hover:opacity-90"
+            priority={priority}
+            sizes="(min-width: 1024px) 33vw, 50vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         </div>
       ) : (
-        <PlaceholderImage className="aspect-[4/3] w-full rounded-[var(--radius-md)] transition-opacity group-hover:opacity-90" />
+        <PlaceholderImage className="aspect-[4/3] w-full rounded-[var(--radius-md)]" />
       )}
-      <p className="mt-3 text-sm font-medium text-[var(--color-text)]">{item.title}</p>
-      <p className="mt-1 line-clamp-2 text-sm text-[var(--color-text-2)]">{item.description}</p>
+      <p className="mt-2.5 text-sm font-medium leading-snug text-[var(--color-text)] sm:mt-3 sm:text-base">
+        {item.title}
+      </p>
       {item.price && (
-        <p className="mt-2 text-base font-semibold text-[var(--color-text)]">{item.price}</p>
+        <p className="mt-1 text-sm font-semibold text-[var(--color-text)] sm:text-base">{item.price}</p>
       )}
+      {details && <p className="mt-1 text-xs text-[var(--color-text-2)] sm:text-sm">{details}</p>}
     </button>
   );
 }

@@ -46,6 +46,9 @@ model Lead {
   description   String
   batchSize     String?
   sourcePage    String?
+  /// Момент, когда посетитель отметил согласие на обработку персональных
+  /// данных (152-ФЗ). null — у заявок, отправленных до появления чекбокса.
+  consentAt     DateTime?
   status        LeadStatus    @default(NEW)
   spamFlag      Boolean       @default(false)
   files         LeadFile[]
@@ -64,7 +67,7 @@ model LeadFile {
 }
 
 /// Кейс портфолио, управляемый через админку. Оформление в духе объявлений
-/// (фото + описание + необязательная цена), без категорий и техотчётов.
+/// (фото + описание + необязательные цена, материал, срок и категории).
 model PortfolioCase {
   id          String           @id @default(cuid())
   title       String
@@ -72,6 +75,16 @@ model PortfolioCase {
   /// Цена — свободный текст (например "2500 ₽" или "от 1500 ₽"), не число:
   /// администратор сам решает, как её сформулировать. Необязательное поле.
   price       String?
+  /// Материал свободным текстом (например "PETG"). Необязательное поле.
+  material    String?
+  /// Срок изготовления свободным текстом (например "2 дня"). Необязательное.
+  leadTime    String?
+  /// Категории через запятую из фиксированного набора (см.
+  /// PORTFOLIO_CATEGORIES в @/lib/portfolio): private, business, scanning,
+  /// agro, auto, signs. SQLite не поддерживает списки — храним строкой.
+  categories  String           @default("")
+  /// Фото «до» — одно из изображений этого же кейса. null — фото «до» нет.
+  beforeImageId String?
   sortOrder   Int              @default(0)
   isPublished Boolean          @default(false)
   createdAt   DateTime         @default(now())

@@ -1,23 +1,24 @@
-import type { Metadata } from "next";
 import { PageHero } from "@/components/page/PageHero";
 import { InfoGrid } from "@/components/page/InfoGrid";
 import { StepsSection } from "@/components/page/StepsSection";
-import { CategoryRequestForm } from "@/components/forms/CategoryRequestForm";
+import { PortfolioSection } from "@/components/portfolio/PortfolioSection";
+import { RequestFormSection } from "@/components/forms/RequestFormSection";
+import { getPublishedCases } from "@/lib/portfolio-queries";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Частным лицам",
+export const metadata = pageMetadata({
+  title: "Изготовить пластиковую деталь по образцу в Ставрополе — 3Дточка",
   description:
-    "Сломалась или потерялась пластиковая деталь? Покажите, что нужно изготовить, — мы разберёмся с решением и доставим готовое изделие.",
-  alternates: { canonical: "/private" },
-  openGraph: {
-    title: "Частным лицам — 3Dpoint / 3Дточка",
-    description:
-      "Сломалась или потерялась пластиковая деталь? Покажите, что нужно изготовить, — мы разберёмся с решением и доставим готовое изделие.",
-    url: "/private",
-  },
-};
+    "Сломалась пластиковая деталь или её больше не продают? Сделаем замену по образцу или фото. Оценка по фото бесплатно.",
+  path: "/private",
+});
 
-export default function PrivatePage() {
+// Работы портфолио читаются из БД — обновляем раз в минуту.
+export const revalidate = 60;
+
+export default async function PrivatePage() {
+  const cases = await getPublishedCases({ category: "private", take: 3 });
+
   return (
     <>
       <PageHero
@@ -25,12 +26,10 @@ export default function PrivatePage() {
         title={
           <>
             Покажите, что сломалось, —
-            <br />
-            мы разберёмся с решением
+            <br className="hidden sm:block" /> мы разберёмся с решением
           </>
         }
-        description="Не нужно искать модель, разбираться в материалах или технологиях изготовления. Достаточно показать проблему — остальное возьмём на себя."
-        ctaLabel="Рассказать о задаче"
+        description="Не нужно искать модель, разбираться в материалах или технологиях. Достаточно показать проблему — остальное возьмём на себя. Работаем в Ставрополе, отправляем доставкой."
       />
 
       <InfoGrid
@@ -61,6 +60,8 @@ export default function PrivatePage() {
         ]}
       />
 
+      <PortfolioSection items={cases} label="Работы" title="Что мы уже сделали для частных клиентов" />
+
       <StepsSection
         label="Как проходит работа"
         title="От сообщения до готовой детали"
@@ -89,10 +90,10 @@ export default function PrivatePage() {
         ]}
       />
 
-      <CategoryRequestForm
-        clientType="PRIVATE"
+      <RequestFormSection
         title="Расскажите, что у вас случилось"
-        description="Достаточно пары предложений и удобного способа связи — мы сами свяжемся с вами, чтобы обсудить детали."
+        description="Достаточно пары предложений и контакта — мы сами свяжемся, чтобы обсудить детали."
+        defaultClientType="PRIVATE"
       />
     </>
   );

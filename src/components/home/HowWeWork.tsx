@@ -1,63 +1,33 @@
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
-type Step = {
-  number: string;
-  title: string;
-  description: string;
-};
-
-const STEPS: Step[] = [
-  {
-    number: "01",
-    title: "Вы рассказываете о задаче",
-    description:
-      "Кратко опишите проблему, оставьте имя и удобный способ связи. При желании приложите фото, образец, чертёж или модель — но это не обязательно.",
-  },
-  {
-    number: "02",
-    title: "Мы изучаем обращение и связываемся",
-    description:
-      "Мы сами выходим на связь в удобное время и уточняем детали задачи — без необходимости заранее готовить техническое задание.",
-  },
-  {
-    number: "03",
-    title: "Согласовываем решение",
-    description:
-      "Обсуждаем задачу, сроки и стоимость до начала работы. Материал, технологию и параметры изготовления подбираем сами.",
-  },
-  {
-    number: "04",
-    title: "Работаем до результата",
-    description:
-      "Изготавливаем деталь, доставляем её или, при необходимости, выезжаем к вам — и доводим задачу до результата.",
-  },
+const STEPS = [
+  "Вы присылаете фото, образец или описание задачи.",
+  "Мы связываемся и уточняем детали.",
+  "Согласовываем решение, сроки и стоимость.",
+  "Изготавливаем и доводим до результата.",
 ];
 
+/** Четыре шага, по одной строке. На мобиле — компактный вертикальный список. */
 export function HowWeWork() {
   return (
-    <section className="border-b border-[var(--color-border)] bg-[var(--color-bg-2)] py-20 sm:py-28">
+    <section className="border-b border-[var(--color-border)] bg-[var(--color-bg)] py-12 sm:py-20">
       <Container>
-        <SectionHeading
-          label="Как это работает"
-          title="От первого сообщения до готового решения"
-        />
+        <SectionHeading label="Как мы работаем" title="От сообщения до готовой детали" />
 
-        <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((step) => (
-            <div key={step.number} className="border-t border-[var(--color-border)] pt-6">
-              <span className="text-3xl font-semibold tracking-[-0.02em] text-[var(--color-text-3)]">
-                {step.number}
+        <ol className="mt-6 grid gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+          {STEPS.map((step, index) => (
+            <li
+              key={step}
+              className="flex items-baseline gap-3 border-t border-[var(--color-border)] pt-3 sm:block sm:pt-5"
+            >
+              <span className="text-lg font-semibold tracking-[-0.02em] text-[var(--color-accent-text)] sm:text-3xl">
+                {String(index + 1).padStart(2, "0")}
               </span>
-              <h3 className="mt-4 text-base font-semibold text-[var(--color-text)]">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-2)]">
-                {step.description}
-              </p>
-            </div>
+              <p className="text-sm leading-relaxed text-[var(--color-text)] sm:mt-3 sm:text-base">{step}</p>
+            </li>
           ))}
-        </div>
+        </ol>
       </Container>
     </section>
   );

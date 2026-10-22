@@ -1,3 +1,5 @@
+import { SERVICES } from "@/content/services";
+
 export const BRAND = {
   en: "3Dpoint",
   ru: "3Дточка",
@@ -8,11 +10,21 @@ export type NavLink = {
   label: string;
 };
 
+/** Основные разделы (в шапке «Услуги» стоит между «Бизнесу» и «Портфолио»). */
 export const NAV_LINKS: NavLink[] = [
   { href: "/private", label: "Частным лицам" },
   { href: "/business", label: "Бизнесу" },
-  { href: "/serial", label: "Серийное производство" },
   { href: "/portfolio", label: "Портфолио" },
+];
+
+export const SERVICE_LINKS: NavLink[] = SERVICES.map((service) => ({
+  href: `/${service.slug}`,
+  label: service.navLabel,
+}));
+
+export const LEGAL_LINKS: NavLink[] = [
+  { href: "/privacy", label: "Политика обработки персональных данных" },
+  { href: "/consent", label: "Согласие на обработку персональных данных" },
 ];
 
 export type PrimaryCta = {
@@ -20,30 +32,21 @@ export type PrimaryCta = {
   href: string;
 };
 
+/** Страницы, на которых есть своя форма заявки (#request-form). */
+const PAGES_WITH_FORM = new Set([
+  "/",
+  "/private",
+  "/business",
+  "/portfolio",
+  ...SERVICE_LINKS.map((link) => link.href),
+]);
+
 /**
- * Основной CTA сайта всегда ведёт к разговору о задаче, а не к звонку/покупке.
- * На странице серийного производства формулировка отличается ("Обсудить
- * производство"), на остальных — единая формулировка "Рассказать о задаче".
- * Якорь #request-form ведёт к форме заявки в конце текущей страницы; со
- * страницы портфолио (где своей формы нет) CTA ведёт на форму-диспетчер
- * на главной.
+ * Основной CTA сайта — «Оставить заявку». Ведёт к форме на текущей
+ * странице, а там, где формы нет (правовые страницы, 404), — к форме на
+ * главной.
  */
 export function getPrimaryCta(pathname: string): PrimaryCta {
-  if (pathname.startsWith("/serial")) {
-    return { label: "Обсудить производство", href: "/serial#request-form" };
-  }
-
-  if (pathname.startsWith("/portfolio")) {
-    return { label: "Рассказать о задаче", href: "/#request-form" };
-  }
-
-  if (pathname.startsWith("/private")) {
-    return { label: "Рассказать о задаче", href: "/private#request-form" };
-  }
-
-  if (pathname.startsWith("/business")) {
-    return { label: "Рассказать о задаче", href: "/business#request-form" };
-  }
-
-  return { label: "Рассказать о задаче", href: "/#request-form" };
+  const page = PAGES_WITH_FORM.has(pathname) ? pathname : "/";
+  return { label: "Оставить заявку", href: `${page}#request-form` };
 }
