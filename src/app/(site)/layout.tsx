@@ -85,7 +85,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
           <MetrikaPageHit />
         </Suspense>
         <MetrikaLinkGoals />
-        <LocalBusinessJsonLd />
+        <LocalBusinessJsonLd maxHref={contacts.max?.href ?? null} />
         <Header contacts={contacts} />
         <main className="flex flex-1 flex-col pb-20 lg:pb-0">{children}</main>
         <Footer contacts={contacts} />

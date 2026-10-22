@@ -55,6 +55,15 @@ export function Footer({ contacts }: { contacts: SiteContacts }) {
                   {contacts.phone.label}
                 </a>
               )}
+              {contacts.max ? (
+                <a href={contacts.max.href} target="_blank" rel="noopener noreferrer" className={linkClasses}>
+                  Написать в MAX
+                </a>
+              ) : (
+                contacts.phone && (
+                  <p className="text-[var(--color-text-inverse)]/75">Этот номер есть в MAX</p>
+                )
+              )}
               {contacts.telegram && (
                 <a
                   href={contacts.telegram.href}

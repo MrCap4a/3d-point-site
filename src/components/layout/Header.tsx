@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { ChevronDownIcon, PhoneIcon, TelegramIcon } from "@/components/ui/icons";
+import { ChevronDownIcon, MaxIcon, PhoneIcon, TelegramIcon } from "@/components/ui/icons";
 import { NAV_LINKS, SERVICE_LINKS, getPrimaryCta } from "@/lib/nav";
 import type { NavLink } from "@/lib/nav";
 import type { SiteContacts } from "@/lib/contacts";
@@ -125,11 +125,17 @@ export function Header({ contacts }: { contacts: SiteContacts }) {
               {contacts.phone && (
                 <a
                   href={contacts.phone.href}
-                  className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-bg-2)]"
-                  aria-label={`Позвонить: ${contacts.phone.label}`}
+                  className="inline-flex items-center gap-2 rounded-[var(--radius-md)] px-3 py-1.5 text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-bg-2)]"
+                  aria-label={`Позвонить: ${contacts.phone.label}${contacts.max ? "" : ". Этот номер есть в MAX"}`}
                 >
                   <PhoneIcon className="h-4 w-4 text-[var(--color-accent)]" />
-                  <span className="hidden xl:inline">{contacts.phone.label}</span>
+                  <span className="hidden flex-col leading-tight xl:flex">
+                    {contacts.phone.label}
+                    {/* Без ссылки на чат помечаем, что номер есть в MAX; со ссылкой рядом стоит значок MAX. */}
+                    {!contacts.max && (
+                      <span className="text-[11px] font-normal text-[var(--color-text-2)]">также в MAX</span>
+                    )}
+                  </span>
                 </a>
               )}
               {contacts.telegram && (
@@ -141,6 +147,17 @@ export function Header({ contacts }: { contacts: SiteContacts }) {
                   className="flex h-10 w-10 items-center justify-center rounded-full text-[#229ED9] hover:bg-[var(--color-bg-2)]"
                 >
                   <TelegramIcon className="h-5 w-5" />
+                </a>
+              )}
+              {contacts.max && (
+                <a
+                  href={contacts.max.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Написать в MAX"
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text)] hover:bg-[var(--color-bg-2)]"
+                >
+                  <MaxIcon className="h-5 w-5" />
                 </a>
               )}
               <Button href={cta.href} size="md">
@@ -230,6 +247,24 @@ export function Header({ contacts }: { contacts: SiteContacts }) {
                 <TelegramIcon className="h-5 w-5 text-[#229ED9]" />
                 Telegram {contacts.telegram.label}
               </a>
+            )}
+            {contacts.max ? (
+              <a
+                href={contacts.max.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 text-lg font-medium text-[var(--color-text-inverse)]"
+              >
+                <MaxIcon className="h-5 w-5" />
+                Написать в MAX
+              </a>
+            ) : (
+              contacts.phone && (
+                <p className="inline-flex items-center gap-3 text-base text-[var(--color-text-inverse)]/80">
+                  <MaxIcon className="h-5 w-5" />
+                  Этот номер есть в MAX
+                </p>
+              )
             )}
             <Button href={cta.href} size="lg" className="mt-2 w-full" onClick={() => setMenuOpen(false)}>
               {cta.label}

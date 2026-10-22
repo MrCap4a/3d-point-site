@@ -6,7 +6,25 @@ export type ContactLink = { label: string; href: string };
 export type SiteContacts = {
   phone: ContactLink | null;
   telegram: ContactLink | null;
+  /**
+   * Ссылка на чат в MAX из настроек админки. У MAX нет публичной ссылки на
+   * чат по номеру телефона (как wa.me), поэтому без ссылки рядом с
+   * телефоном просто пишем, что номер есть в MAX.
+   */
+  max: ContactLink | null;
 };
+
+/** Принимаем только ссылки на max.ru — чтобы в шапку не попал чужой адрес. */
+export function maxHref(raw: string): string | null {
+  try {
+    const url = new URL(raw.trim());
+    const host = url.hostname.toLowerCase();
+    if (url.protocol !== "https:" || (host !== "max.ru" && !host.endsWith(".max.ru"))) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Телефон в href="tel:..." — только цифры и ведущий "+". Российские номера,
@@ -42,7 +60,7 @@ export function telegramUsername(raw: string): string | null {
  */
 export async function getSiteContacts(): Promise<SiteContacts> {
   const rows = await prisma.siteSetting.findMany({
-    where: { key: { in: ["phone", "telegram"] } },
+    where: { key: { in: ["phone", "telegram", "max"] } },
   });
   const settings = Object.fromEntries(rows.map((r) => [r.key, r.value.trim()]));
   const values = {
@@ -52,9 +70,11 @@ export async function getSiteContacts(): Promise<SiteContacts> {
 
   const phone = values.phone ? phoneHref(values.phone) : null;
   const telegram = values.telegram ? telegramUsername(values.telegram) : null;
+  const max = settings.max ? maxHref(settings.max) : null;
 
   return {
     phone: phone ? { label: values.phone, href: phone } : null,
     telegram: telegram ? { label: `@${telegram}`, href: `https://t.me/${telegram}` } : null,
+    max: max ? { label: "MAX", href: max } : null,
   };
 }

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { METRIKA_ID, reachGoal } from "@/lib/metrika";
 
 /**
- * Цели phone_click и telegram_click для всех ссылок tel: и t.me на сайте —
+ * Цели phone_click, telegram_click и max_click для всех ссылок tel:, t.me и max.ru —
  * одним делегированным обработчиком, чтобы не навешивать цели в каждом
  * месте, где выводится телефон или Telegram.
  */
@@ -21,6 +21,8 @@ export function MetrikaLinkGoals() {
         reachGoal("phone_click");
       } else if (/^https?:\/\/(t\.me|telegram\.me)\//i.test(href)) {
         reachGoal("telegram_click");
+      } else if (/^https:\/\/([a-z0-9-]+\.)*max\.ru\//i.test(href)) {
+        reachGoal("max_click");
       }
     };
 

@@ -6,7 +6,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://3-dpoint.ru";
  * Структурированные данные LocalBusiness для поисковиков. Адрес — только
  * город и регион, без улицы: у мастерской нет публичного офиса.
  */
-export function LocalBusinessJsonLd() {
+export function LocalBusinessJsonLd({ maxHref = null }: { maxHref?: string | null }) {
   const data = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -23,7 +23,7 @@ export function LocalBusinessJsonLd() {
       addressCountry: "RU",
     },
     areaServed: "Ставрополь",
-    sameAs: [COMPANY.telegram.url],
+    sameAs: [COMPANY.telegram.url, ...(maxHref ? [maxHref] : [])],
   };
 
   return (

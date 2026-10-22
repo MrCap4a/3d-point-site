@@ -58,3 +58,17 @@ export function FileIcon({ className = "h-6 w-6" }: IconProps) {
     </svg>
   );
 }
+
+/** Значок мессенджера MAX — нейтральное облачко сообщения, не логотип. */
+export function MaxIcon({ className = "h-5 w-5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M12 3.5c-4.7 0-8.5 3.4-8.5 7.6 0 2.3 1.1 4.3 2.9 5.7l-.6 3.7 3.6-2a9.6 9.6 0 0 0 2.6.3c4.7 0 8.5-3.4 8.5-7.7S16.7 3.5 12 3.5Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

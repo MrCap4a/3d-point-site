@@ -50,7 +50,7 @@ export const METRIKA_SCRIPT =
 `;
 
 /** Цели Метрики, которые отправляет сайт. */
-export type MetrikaGoal = "form_submit" | "phone_click" | "telegram_click" | "portfolio_cta";
+export type MetrikaGoal = "form_submit" | "phone_click" | "telegram_click" | "max_click" | "portfolio_cta";
 
 type Ym = ((counterId: number, method: string, ...args: unknown[]) => void) & {
   a?: IArguments[];
