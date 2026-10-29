@@ -29,3 +29,15 @@ export async function saveUploadedFile(
     sizeBytes: buffer.byteLength,
   };
 }
+
+/**
+ * Полный путь к файлу заявки по storedPath из БД. Проверяем, что путь не
+ * выходит за пределы каталога uploads/leads (защита от «../» в записи).
+ */
+export function resolveLeadFilePath(storedPath: string): string | null {
+  const leadsDir = path.resolve(/* turbopackIgnore: true */ process.cwd(), UPLOADS_DIR, "leads");
+  // storedPath мог быть записан на Windows с «\» — приводим к «/».
+  const normalized = storedPath.split("\\").join("/");
+  const fullPath = path.resolve(/* turbopackIgnore: true */ process.cwd(), UPLOADS_DIR, normalized);
+  return fullPath.startsWith(leadsDir + path.sep) ? fullPath : null;
+}
