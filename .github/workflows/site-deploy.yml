@@ -1,7 +1,7 @@
 name: Printing site checks and image
 on:
   push:
-    branches: [master, codex/print3d-image-ci]
+    branches: [master, codex/print3d-image-ci, codex/telegram-ssh]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -22,6 +22,7 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
       - run: npm run lint
+      - run: node --test tests/telegram-transport.test.mjs
       - uses: docker/setup-buildx-action@v3
       - name: Build image
         env:

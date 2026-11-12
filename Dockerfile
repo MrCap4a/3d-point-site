@@ -77,6 +77,8 @@ COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/public ./public
 COPY deploy/entrypoint.sh /app/entrypoint.sh
+COPY scripts/telegram-check.mjs /app/scripts/telegram-check.mjs
+COPY src/lib/telegram-transport.mjs /app/src/lib/telegram-transport.mjs
 
 # Каталог для загруженных файлов (заявки, изображения портфолио).
 # ВАЖНО: для продакшена смонтируйте сюда volume, чтобы файлы

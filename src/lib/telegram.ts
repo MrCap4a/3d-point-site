@@ -1,4 +1,5 @@
 import type { Lead } from "@prisma/client";
+import { telegramRequest } from "./telegram-transport.mjs";
 
 /**
  * Уведомление администратора о новой заявке через Telegram-бота.
@@ -56,29 +57,15 @@ export async function notifyNewLead(lead: Lead, fileCount = 0): Promise<void> {
   }
 
   try {
-    const response = await fetch(
-      `https://api.telegram.org/bot${token}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: buildMessage(lead, fileCount),
-          parse_mode: "HTML",
-          disable_web_page_preview: true,
-        }),
-        // Не даём медленному Telegram задерживать ответ пользователю.
-        signal: AbortSignal.timeout(10_000),
-      }
-    );
-
-    if (!response.ok) {
-      const details = await response.text().catch(() => "");
-      console.error(
-        `Telegram sendMessage вернул ${response.status}: ${details.slice(0, 500)}`
-      );
-    }
-  } catch (error) {
-    console.error("Не удалось отправить Telegram-уведомление о заявке", error);
+    const response = await telegramRequest("sendMessage", token, {
+      chat_id: chatId,
+      text: buildMessage(lead, fileCount),
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+    });
+    if (!response.ok) console.error("Telegram: API отклонил уведомление", response.status);
+  } catch {
+    // Не печатаем URL с токеном, текст заявки и исходные сетевые ошибки.
+    console.error("Telegram: уведомление не отправлено; заявка сохранена в админке");
   }
 }
