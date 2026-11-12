@@ -31,3 +31,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .eslintcache
+
+**/runtime.env
+**/state
+**/backups
+**/candidate
+*.db-*
+*.sqlite-*
+*.tar
+*.tar.gz

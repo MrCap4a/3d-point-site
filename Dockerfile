@@ -30,7 +30,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # в рантайме можно было примонтировать volume только на данные, не
 # перекрывая schema.prisma и migrations/. В рантайме путь переопределяется.
 ENV DATABASE_URL="file:/app/data/dev.db"
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data /app/public
 
 # NEXT_PUBLIC_* переменные попадают в JS-бандлы на этапе сборки,
 # поэтому прокидываются как build-arg (см. GitHub Action).
@@ -44,9 +44,8 @@ ENV NEXT_PUBLIC_YM_ID=$NEXT_PUBLIC_YM_ID
 ARG NEXT_PUBLIC_YANDEX_VERIFICATION
 ENV NEXT_PUBLIC_YANDEX_VERIFICATION=$NEXT_PUBLIC_YANDEX_VERIFICATION
 
-# Страницы портфолио пререндерятся во время сборки (ISR, revalidate=60)
-# и читают базу данных, поэтому до `next build` применяем миграции
-# и генерируем Prisma Client.
+# Только временная сборочная база; рабочая база в образ не копируется.
+# public может отсутствовать в Git, если каталог пока пустой.
 RUN npx prisma migrate deploy \
   && npx prisma generate \
   && npm run build
@@ -76,7 +75,8 @@ RUN npm prune --omit=dev
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/data ./data
+COPY --from=builder /app/public ./public
+COPY deploy/entrypoint.sh /app/entrypoint.sh
 
 # Каталог для загруженных файлов (заявки, изображения портфолио).
 # ВАЖНО: для продакшена смонтируйте сюда volume, чтобы файлы
@@ -90,4 +90,4 @@ EXPOSE 3000
 
 # Миграции применяются при каждом старте контейнера (идемпотентно),
 # затем запускается production-сервер Next.js.
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["sh", "/app/entrypoint.sh"]

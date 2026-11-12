@@ -1,0 +1,106 @@
+name: Printing site checks and image
+on:
+  push:
+    branches: [master, codex/print3d-image-ci]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: print3d-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
+jobs:
+  check-build:
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+          SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://3-dpoint.ru' }}
+          YM_ID: ${{ vars.NEXT_PUBLIC_YM_ID }}
+          YANDEX_VERIFICATION: ${{ vars.NEXT_PUBLIC_YANDEX_VERIFICATION }}
+        run: |
+          if ! docker buildx build --load --progress=plain \
+            --tag "print3d-site:$RELEASE_SHA" \
+            --build-arg "NEXT_PUBLIC_SITE_URL=$SITE_URL" \
+            --build-arg "NEXT_PUBLIC_YM_ID=$YM_ID" \
+            --build-arg "NEXT_PUBLIC_YANDEX_VERIFICATION=$YANDEX_VERIFICATION" \
+            --label "org.opencontainers.image.source=https://github.com/$REPOSITORY" \
+            --label "org.opencontainers.image.revision=$RELEASE_SHA" \
+            . > "$RUNNER_TEMP/image-build.log" 2>&1; then
+            tail -n 100 "$RUNNER_TEMP/image-build.log"
+            python3 - <<'PY'
+          import os
+          from pathlib import Path
+          lines = (Path(os.environ['RUNNER_TEMP']) / 'image-build.log').read_text(errors='replace').splitlines()
+          message = '\n'.join(lines[-100:])[-24000:]
+          print('::error title=Container build failed::' + message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PY
+            exit 1
+          fi
+          tail -n 20 "$RUNNER_TEMP/image-build.log"
+      - name: Test image and persistence
+        env:
+          SITE_IMAGE: print3d-site:${{ github.sha }}
+        run: |
+          if ! bash deploy/smoke.sh > "$RUNNER_TEMP/smoke.log" 2>&1; then
+            cat "$RUNNER_TEMP/smoke.log"
+            python3 - <<'PY'
+          import os
+          from pathlib import Path
+          message = (Path(os.environ['RUNNER_TEMP']) / 'smoke.log').read_text(errors='replace')[-24000:]
+          print('::error title=Container test failed::' + message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PY
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/smoke.log"
+      - name: Save tested image
+        if: github.event_name != 'pull_request'
+        run: docker save print3d-site:${{ github.sha }} | gzip -1 > /tmp/image.tar.gz
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: site-image
+          path: /tmp/image.tar.gz
+          retention-days: 2
+  publish:
+    timeout-minutes: 20
+    needs: check-build
+    # Off until the first image publication is explicitly enabled.
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && vars.PUBLISH_ENABLED == 'true'
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site-image
+          path: /tmp/site-image
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish the tested image
+        env:
+          REPOSITORY: ${{ github.repository }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/${REPOSITORY,,}:$RELEASE_SHA"
+          gzip -dc /tmp/site-image/image.tar.gz | docker load
+          docker tag "print3d-site:$RELEASE_SHA" "$image"
+          docker push "$image"
+          printf 'Image for the infrastructure repository: `%s`\n' "$image" >> "$GITHUB_STEP_SUMMARY"
