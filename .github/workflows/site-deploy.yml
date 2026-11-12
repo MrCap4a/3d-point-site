@@ -23,20 +23,33 @@ jobs:
       - run: npx prisma generate
       - run: npm run lint
       - uses: docker/setup-buildx-action@v3
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          tags: print3d-site:${{ github.sha }}
-          load: true
-          build-args: |
-            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://3-dpoint.ru' }}
-            NEXT_PUBLIC_YM_ID=${{ vars.NEXT_PUBLIC_YM_ID }}
-            NEXT_PUBLIC_YANDEX_VERIFICATION=${{ vars.NEXT_PUBLIC_YANDEX_VERIFICATION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          labels: |
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Build image
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+          SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://3-dpoint.ru' }}
+          YM_ID: ${{ vars.NEXT_PUBLIC_YM_ID }}
+          YANDEX_VERIFICATION: ${{ vars.NEXT_PUBLIC_YANDEX_VERIFICATION }}
+        run: |
+          if ! docker buildx build --load --progress=plain \
+            --tag "print3d-site:$RELEASE_SHA" \
+            --build-arg "NEXT_PUBLIC_SITE_URL=$SITE_URL" \
+            --build-arg "NEXT_PUBLIC_YM_ID=$YM_ID" \
+            --build-arg "NEXT_PUBLIC_YANDEX_VERIFICATION=$YANDEX_VERIFICATION" \
+            --label "org.opencontainers.image.source=https://github.com/$REPOSITORY" \
+            --label "org.opencontainers.image.revision=$RELEASE_SHA" \
+            . > "$RUNNER_TEMP/image-build.log" 2>&1; then
+            tail -n 100 "$RUNNER_TEMP/image-build.log"
+            python3 - <<'PY'
+          import os
+          from pathlib import Path
+          lines = (Path(os.environ['RUNNER_TEMP']) / 'image-build.log').read_text(errors='replace').splitlines()
+          message = '\n'.join(lines[-100:])[-24000:]
+          print('::error title=Container build failed::' + message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PY
+            exit 1
+          fi
+          tail -n 20 "$RUNNER_TEMP/image-build.log"
       - name: Test image and persistence
         env:
           SITE_IMAGE: print3d-site:${{ github.sha }}
