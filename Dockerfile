@@ -76,7 +76,8 @@ RUN npm prune --omit=dev
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/data ./data
+COPY --from=builder /app/public ./public
+COPY deploy/entrypoint.sh /app/entrypoint.sh
 
 # Каталог для загруженных файлов (заявки, изображения портфолио).
 # ВАЖНО: для продакшена смонтируйте сюда volume, чтобы файлы
@@ -90,4 +91,4 @@ EXPOSE 3000
 
 # Миграции применяются при каждом старте контейнера (идемпотентно),
 # затем запускается production-сервер Next.js.
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["sh", "/app/entrypoint.sh"]

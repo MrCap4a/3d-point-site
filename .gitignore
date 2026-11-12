@@ -19,6 +19,7 @@ pnpm-debug.log*
 
 # Local caches / build artifacts
 .cache/
+*.tsbuildinfo
 coverage/
 
 # Database files
@@ -43,3 +44,15 @@ Thumbs.db
 *.key
 *.crt
 *.p12
+
+# Deployment state and secrets
+runtime.env
+deploy/runtime.env
+deploy/.env
+state/
+backups/
+candidate/
+*.db-*
+*.sqlite-*
+*.tar
+*.tar.gz

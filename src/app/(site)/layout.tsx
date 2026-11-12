@@ -16,6 +16,10 @@ import "../globals.css";
 
 const yandexVerification = process.env.NEXT_PUBLIC_YANDEX_VERIFICATION?.trim();
 
+// The image is built against an empty temporary DB. Read the live settings
+// and portfolio at request time instead of serving that build-time snapshot.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   ...pageMetadata({
