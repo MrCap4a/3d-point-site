@@ -26,6 +26,7 @@ export function Header({ contacts }: { contacts: SiteContacts }) {
   const [renderedPathname, setRenderedPathname] = useState(pathname);
   const servicesRef = useRef<HTMLDivElement>(null);
   const cta = getPrimaryCta(pathname);
+  const hasMobileContacts = Boolean(contacts.phone || contacts.telegram || contacts.max);
   const isServiceActive = SERVICE_LINKS.some((link) => link.href === pathname);
 
   // Закрываем меню при смене маршрута. Сброс состояния при смене пропса
@@ -98,7 +99,7 @@ export function Header({ contacts }: { contacts: SiteContacts }) {
                 {servicesOpen && (
                   <div
                     id="services-menu"
-                    className="absolute left-0 top-full mt-2 w-64 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-2 shadow-lg"
+                    className="absolute left-0 top-full mt-2 w-80 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-2 shadow-lg"
                   >
                     {SERVICE_LINKS.map((link) => (
                       <Link
@@ -176,13 +177,39 @@ export function Header({ contacts }: { contacts: SiteContacts }) {
               <BurgerIcon open={menuOpen} />
             </button>
           </div>
+          {hasMobileContacts && (
+            <div className="flex h-14 items-center justify-between gap-2 border-t border-[var(--color-border)] lg:hidden" aria-label="Контакты">
+              {contacts.phone && (
+                <a href={contacts.phone.href} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg text-sm font-semibold text-[var(--color-text)]" aria-label={`Позвонить: ${contacts.phone.label}. Этот номер также есть в MAX`}>
+                  <PhoneIcon className="h-4 w-4 shrink-0 text-[var(--color-accent)]" />
+                  <span className="flex flex-col leading-tight">
+                    {contacts.phone.label}
+                    <span className="mt-0.5 text-[11px] font-normal text-[var(--color-text-2)]">также в MAX</span>
+                  </span>
+                </a>
+              )}
+              <div className="flex items-center gap-1">
+                {contacts.telegram && (
+                  <a href={contacts.telegram.href} target="_blank" rel="noopener noreferrer" aria-label="Написать в Telegram" className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-medium text-[#229ED9] hover:bg-[var(--color-bg-2)]">
+                    <TelegramIcon className="h-5 w-5 shrink-0" />
+                    <span className={contacts.max ? "hidden min-[400px]:inline" : undefined}>Telegram</span>
+                  </a>
+                )}
+                {contacts.max && (
+                  <a href={contacts.max.href} target="_blank" rel="noopener noreferrer" aria-label="Написать в MAX" className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-[var(--color-text)] hover:bg-[var(--color-bg-2)]">
+                    <MaxIcon className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
         </Container>
       </header>
 
       {menuOpen && (
         <div
           id="mobile-menu"
-          className="fixed inset-x-0 top-16 bottom-0 z-50 flex flex-col overflow-y-auto bg-[var(--color-bg-deep)] px-6 py-8 sm:top-20 lg:hidden"
+          className={`fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-y-auto bg-[var(--color-bg-deep)] px-6 py-8 lg:hidden ${hasMobileContacts ? "top-[7.5rem] sm:top-[8.5rem]" : "top-16 sm:top-20"}`}
         >
           <nav className="flex flex-col gap-5" aria-label="Мобильная навигация">
             {[privateLink, businessLink].map((link) => (

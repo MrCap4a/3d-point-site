@@ -17,7 +17,11 @@ export const NAV_LINKS: NavLink[] = [
   { href: "/portfolio", label: "Портфолио" },
 ];
 
-export const SERVICE_LINKS: NavLink[] = SERVICES.map((service) => ({
+export const SERVICE_LINKS: NavLink[] = SERVICES.filter((service) => !service.industry)
+  .sort((a, b) => {
+    const order = ["vosstanovlenie", "3d-pechat", "modelirovanie", "skanirovanie", "prototipy"];
+    return order.indexOf(a.slug) - order.indexOf(b.slug);
+  }).map((service) => ({
   href: `/${service.slug}`,
   label: service.navLabel,
 }));
@@ -38,7 +42,7 @@ const PAGES_WITH_FORM = new Set([
   "/private",
   "/business",
   "/portfolio",
-  ...SERVICE_LINKS.map((link) => link.href),
+  ...SERVICES.map((service) => `/${service.slug}`),
 ]);
 
 /**

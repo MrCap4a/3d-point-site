@@ -44,7 +44,7 @@ export function CookieBanner() {
     <div
       role="region"
       aria-label="Уведомление о cookie"
-      className="fixed inset-x-3 bottom-20 z-40 mx-auto flex max-w-xl flex-wrap items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-4 text-sm text-[var(--color-text-2)] shadow-lg lg:bottom-6"
+      className="fixed inset-x-3 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-xl flex-wrap items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-4 text-sm text-[var(--color-text-2)] shadow-lg lg:bottom-6"
     >
       <p className="min-w-0 flex-1">
         Сайт использует cookie и Яндекс Метрику, чтобы понимать, как им

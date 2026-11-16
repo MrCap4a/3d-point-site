@@ -91,8 +91,9 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <MetrikaLinkGoals />
         <LocalBusinessJsonLd maxHref={contacts.max?.href ?? null} />
         <Header contacts={contacts} />
-        <main className="flex flex-1 flex-col pb-20 lg:pb-0">{children}</main>
+        <main className="flex flex-1 flex-col">{children}</main>
         <Footer contacts={contacts} />
+        <div aria-hidden="true" className="h-[calc(5rem+env(safe-area-inset-bottom))] shrink-0 bg-[var(--color-bg-deep)] lg:hidden" />
         <MobileCtaBar contacts={contacts} />
         <CookieBanner />
       </body>

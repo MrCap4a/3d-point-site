@@ -27,7 +27,7 @@ export async function RequestFormSection({
   const contacts = await getSiteContacts();
 
   return (
-    <section id={REQUEST_FORM_ID} className="scroll-mt-20 bg-[var(--color-bg-2)] py-14 sm:py-24">
+    <section id={REQUEST_FORM_ID} className="bg-[var(--color-bg-2)] py-14 sm:py-24">
       <Container>
         <div className="mx-auto max-w-2xl">
           <SectionHeading align="center" label="Заявка" title={title} description={description} />
